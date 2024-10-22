@@ -64,7 +64,10 @@ export default function createApp(options = {}) {
         const { kind } = request.body;
         reply.send({ drink: `${kind} ` + drink, with: extras });
       } else {
-        reply.send({ drink, with: extras });
+        if (drink !== 'tea' && drink !== 'chai') {
+          reply.code(418).send({ drink, with: extras });
+        }
+        reply.code(201).send({ drink, with: extras });
       }
     }
   );
