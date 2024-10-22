@@ -18,6 +18,9 @@ export default function createApp(options = {}) {
     Body?: {
       kind: string;
     };
+    Headers?: {
+      'CodeCool-Beverages-Dietary'?: 'lactose-intolerance' | 'vegan';
+    };
   };
 
   app.post<MakeSomethingSoftSweetType>(
@@ -31,7 +34,22 @@ export default function createApp(options = {}) {
         'milk' in request.query &&
         request.query['milk'] === 'yes'
       ) {
-        extras.push('milk');
+        if (
+          request.headers &&
+          'codecool-beverages-dietary' in request.headers &&
+          request.headers['codecool-beverages-dietary'] ===
+            'lactose-intolerance'
+        ) {
+          extras.push('lf-milk');
+        } else if (
+          request.headers &&
+          'codecool-beverages-dietary' in request.headers &&
+          request.headers['codecool-beverages-dietary'] === 'vegan'
+        ) {
+          extras.push('oat-milk');
+        } else {
+          extras.push('milk');
+        }
       }
 
       if (
