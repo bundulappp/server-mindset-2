@@ -27,6 +27,7 @@ export default function createApp(options = {}) {
     '/api/beverages/:drink',
     (request, reply) => {
       const { drink } = request.params;
+      const acceptableDrinks = ['tea', 'chai', 'coffee'];
       const extras: string[] = [];
 
       if (
@@ -64,10 +65,17 @@ export default function createApp(options = {}) {
         const { kind } = request.body;
         reply.send({ drink: `${kind} ` + drink, with: extras });
       } else {
-        if (drink !== 'tea' && drink !== 'chai') {
-          reply.code(418).send({ drink, with: extras });
+        if (
+          drink !== 'tea' &&
+          drink !== 'chai' &&
+          acceptableDrinks.includes(drink)
+        ) {
+          return reply.code(418).send({ drink, with: extras });
+        } else if (!acceptableDrinks.includes(drink)) {
+          return reply.code(400).send({ reason: 'bad drink' });
+        } else {
+          return reply.code(201).send({ drink, with: extras });
         }
-        reply.code(201).send({ drink, with: extras });
       }
     }
   );
