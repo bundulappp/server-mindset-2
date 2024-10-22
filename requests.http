@@ -6,4 +6,4 @@ GET {{host}}/api/hello
 
 ### 
 
-POST {{host}}/api/beverages2/tea?milk=yes
+POST {{host}}/api/beverages/tea?sugar=no&milk=yes

@@ -15,6 +15,9 @@ export default function createApp(options = {}) {
       milk?: 'yes';
       sugar?: 'yes';
     };
+    Body?: {
+      kind: string;
+    };
   };
 
   app.post<MakeSomethingSoftSweetType>(
@@ -39,7 +42,12 @@ export default function createApp(options = {}) {
         extras.push('sugar');
       }
 
-      reply.send({ drink, with: extras });
+      if (request.body) {
+        const { kind } = request.body;
+        reply.send({ drink: `${kind} ` + drink, with: extras });
+      } else {
+        reply.send({ drink, with: extras });
+      }
     }
   );
 
