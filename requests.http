@@ -3,3 +3,7 @@
 ###
 
 GET {{host}}/api/hello
+
+### 
+
+POST {{host}}/api/beverages2/tea?milk=yes
