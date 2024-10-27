@@ -7,3 +7,8 @@ GET {{host}}/api/hello
 ### 
 
 POST {{host}}/api/beverages/tea?sugar=no&milk=yes
+Content-Type: application/json
+
+{
+    "kind":"Englist-breakfast"
+}

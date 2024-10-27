@@ -23,8 +23,47 @@ export default function createApp(options = {}) {
     };
   };
 
+  const queryStringJsonSchema = {
+    type: 'object',
+    properties: {
+      milk: { type: 'string' },
+      sugar: { type: 'string' },
+    },
+    additionalProperties: false,
+  };
+
+  const bodyJsonSchema = {
+    type: 'object',
+    properties: {
+      kind: { type: 'string' },
+    },
+    additionalProperties: false,
+  };
+
+  const responseSchema = {
+    response: {
+      default: {
+        type: 'object',
+        properties: {
+          drinks: { type: 'string' },
+          with: {
+            type: 'array',
+            maxItems: 2,
+            items: { type: 'string' },
+          },
+        },
+      },
+    },
+  };
+
+  const schema = {
+    body: bodyJsonSchema,
+    querystring: queryStringJsonSchema,
+    // response: responseSchema,
+  };
   app.post<MakeSomethingSoftSweetType>(
     '/api/beverages/:drink',
+    { schema },
     (request, reply) => {
       const { drink } = request.params;
       const acceptableDrinks = ['tea', 'chai', 'coffee'];
@@ -63,7 +102,7 @@ export default function createApp(options = {}) {
 
       if (request.body) {
         const { kind } = request.body;
-        reply.send({ drink: `${kind} ` + drink, with: extras });
+        reply.code(201).send({ drink: `${kind} ` + drink, with: extras });
       } else {
         if (
           drink !== 'tea' &&
