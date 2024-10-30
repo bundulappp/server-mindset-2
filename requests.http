@@ -6,8 +6,9 @@ GET {{host}}/api/hello
 
 ### 
 
-POST {{host}}/api/beverages/tea?sugar=no&milk=yes
+POST {{host}}/api/beverages/tea?sugar=yes&milk=yes
 Content-Type: application/json
+codecool-beverages-dietary: lactose-intolerance
 
 {
     "kind":"Englist-breakfast"

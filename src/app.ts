@@ -1,4 +1,8 @@
-import fastify, { FastifyRequest } from 'fastify';
+import { fastify, FastifyReply, FastifyRequest, FastifySchema } from 'fastify';
+
+import { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
+
+const server = fastify().withTypeProvider<JsonSchemaToTsProvider>();
 
 export default function createApp(options = {}) {
   const app = fastify(options);
@@ -29,61 +33,87 @@ export default function createApp(options = {}) {
       milk: { type: 'string' },
       sugar: { type: 'string' },
     },
-    additionalProperties: false,
-  };
-
-  const bodyJsonSchema = {
-    type: 'object',
-    properties: {
-      kind: { type: 'string' },
-    },
-    additionalProperties: false,
   };
 
   const responseSchema = {
-    response: {
-      default: {
-        type: 'object',
-        properties: {
-          drinks: { type: 'string' },
-          with: {
-            type: 'array',
-            maxItems: 2,
-            items: { type: 'string' },
-          },
+    201: {
+      type: 'object',
+      properties: {
+        drink: { type: 'string' },
+        with: {
+          type: 'array',
+          items: { type: 'string' },
+          maxItems: 2,
         },
+      },
+    },
+    400: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string' },
+      },
+    },
+    418: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string' },
       },
     },
   };
 
-  const schema = {
-    body: bodyJsonSchema,
-    querystring: queryStringJsonSchema,
-    // response: responseSchema,
+  const paramsSchema = {
+    type: 'object',
+    properties: {
+      drink: { enum: ['tea', 'coffee', 'chai'] },
+    },
+    required: ['drink'],
+    additionalProperties: false,
   };
-  app.post<MakeSomethingSoftSweetType>(
+
+  const headersJsonSchema = {
+    type: 'object',
+    properties: {
+      'codecool-beverages-dietary': { enum: ['vegan', 'lactose-intolerance'] },
+    },
+  };
+
+  const schema: FastifySchema = {
+    params: paramsSchema,
+    querystring: queryStringJsonSchema,
+    headers: headersJsonSchema,
+    response: responseSchema,
+  };
+
+  type ParamsType = { drink: string };
+  type QueryType = { milk: string; sugar: string };
+  type BodyType = { kind: string };
+
+  app.post(
     '/api/beverages/:drink',
-    { schema },
-    (request, reply) => {
+    {
+      schema,
+    },
+    (
+      request: FastifyRequest<{
+        Params: ParamsType;
+        Querystring: QueryType;
+        Body: BodyType;
+      }>,
+      reply
+    ) => {
       const { drink } = request.params;
       const acceptableDrinks = ['tea', 'chai', 'coffee'];
       const extras: string[] = [];
 
-      if (
-        request.query &&
-        'milk' in request.query &&
-        request.query['milk'] === 'yes'
-      ) {
+      if (request.query.milk === 'yes') {
         if (
           request.headers &&
-          'codecool-beverages-dietary' in request.headers &&
           request.headers['codecool-beverages-dietary'] ===
             'lactose-intolerance'
         ) {
           extras.push('lf-milk');
         } else if (
           request.headers &&
-          'codecool-beverages-dietary' in request.headers &&
           request.headers['codecool-beverages-dietary'] === 'vegan'
         ) {
           extras.push('oat-milk');
@@ -92,11 +122,7 @@ export default function createApp(options = {}) {
         }
       }
 
-      if (
-        request.query &&
-        'sugar' in request.query &&
-        request.query['sugar'] === 'yes'
-      ) {
+      if (request.query.sugar === 'yes') {
         extras.push('sugar');
       }
 
